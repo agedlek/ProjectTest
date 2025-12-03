@@ -18,14 +18,14 @@ namespace ProjectTest.Controllers
             products = new List<Product>()
             {
                 new Product{
-                    Id = Guid.NewGuid(),
-                    ProductName = "X",
+                    Id = Guid.Parse("2a2f376b-5648-497e-8b23-aadcdee15a29"),
+                    ProductName = "Product1",
                     QuantityInStock = 1,
                     UnitPrice = 2
                 },
                 new Product{
-                    Id = Guid.NewGuid(),
-                    ProductName = "yz",
+                    Id = Guid.Parse("8b5527dd-eaec-48db-b4a5-ff7aa827a325"),
+                    ProductName = "Product2",
                     QuantityInStock = 3,
                     UnitPrice = 2
                 }
@@ -33,8 +33,8 @@ namespace ProjectTest.Controllers
 
             products.Add(new Product
             {
-                Id = Guid.NewGuid(),
-                ProductName = "yz",
+                Id = Guid.Parse("8d699719-ed78-4023-adeb-fe4333255961"),
+                ProductName = "Product3",
                 QuantityInStock = 3,
                 UnitPrice = 2
             });
@@ -50,8 +50,60 @@ namespace ProjectTest.Controllers
         [HttpGet("{id}")]
         public Product? GetProduct(Guid id)
         {
-           var product =  products.FirstOrDefault(p => p.Id == id);
-            return products[0];
+            var product = FindProduct(id);
+
+            return product;
         }
+
+        [HttpPost(Name = "CreateProduct")]
+        public List<Product> AddProduct(string productName, double unitPrice, int quantityInStock)
+        {
+            products.Add(
+                new Product
+                {
+                    Id = Guid.NewGuid(),
+                    ProductName = productName,
+                    UnitPrice = unitPrice,
+                    QuantityInStock = quantityInStock
+                }
+                );
+
+            return products;
+        }
+           
+
+        [HttpDelete("id")]
+        public List<Product> DeleteProduct(Guid id)
+        {
+            var product = FindProduct(id);
+
+            products.Remove(product);
+
+            return products;
+        }
+
+        [HttpPut("id")]
+
+        public Product? UpdateProduct(Guid id, Product updateProduct)
+        {
+            var product = FindProduct(id);
+
+            product.ProductName = updateProduct.ProductName;
+            product.UnitPrice = updateProduct.UnitPrice;
+            product.QuantityInStock = updateProduct.QuantityInStock;
+
+            return product;
+        }
+
+        public Product? FindProduct(Guid id)
+        {
+            var product = products.FirstOrDefault(p => p.Id == id);
+            return product;
+        }
+
+
+      
+
+
     }
 }
