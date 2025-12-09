@@ -95,7 +95,8 @@ namespace ProjectTest.Controllers
             return product;
         }
 
-        public Product? FindProduct(Guid id)
+
+        private Product? FindProduct(Guid id)
         {
             var product = products.FirstOrDefault(p => p.Id == id);
             return product;
