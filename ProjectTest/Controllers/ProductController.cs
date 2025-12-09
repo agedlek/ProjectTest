@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ProjectTest.Data;
 using ProjectTest.Model;
 
 namespace ProjectTest.Controllers
@@ -9,12 +10,15 @@ namespace ProjectTest.Controllers
     {
         
         private readonly ILogger<ProductController> _logger;
+        private readonly ProjectTestDbContext _projectTestDb;
 
         private List<Product> products;
        
-        public ProductController(ILogger<ProductController> logger)
+        public ProductController(ILogger<ProductController> logger, ProjectTestDbContext projectDb)
         {
             _logger = logger;
+            _projectTestDb = projectDb;
+
             products = new List<Product>()
             {
                 new Product{
@@ -56,19 +60,21 @@ namespace ProjectTest.Controllers
         }
 
         [HttpPost(Name = "CreateProduct")]
-        public List<Product> AddProduct(string productName, double unitPrice, int quantityInStock)
+        public Product AddProduct(string productName, double unitPrice, int quantityInStock)
         {
-            products.Add(
-                new Product
-                {
-                    Id = Guid.NewGuid(),
-                    ProductName = productName,
-                    UnitPrice = unitPrice,
-                    QuantityInStock = quantityInStock
-                }
-                );
+           
+            var product = new Product
+            {
+                Id = Guid.NewGuid(),
+                ProductName = productName,
+                UnitPrice = unitPrice,
+                QuantityInStock = quantityInStock
+            };
 
-            return products;
+            _projectTestDb.Product.Add(product);
+            _projectTestDb.SaveChanges();
+
+            return product;
         }
            
 
