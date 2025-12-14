@@ -1,17 +1,10 @@
-﻿namespace ProjectTest.Model
+﻿namespace ProjectTest.Dto
 {
-    public class Product
+    public class AddProduct
     {
-        public Guid Id { get; set; }
         public string ProductName { get; set; }
         public double UnitPrice { get; set; }
         public int QuantityInStock { get; set; }
-
-        public OrderLine  OrderLine { get; set; }
-  
-
-
-        
 
     }
 }

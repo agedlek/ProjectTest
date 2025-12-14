@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ProjectTest.Data;
+using ProjectTest.Dto;
 using ProjectTest.Model;
 
 namespace ProjectTest.Controllers
@@ -12,43 +13,17 @@ namespace ProjectTest.Controllers
         private readonly ILogger<ProductController> _logger;
         private readonly ProjectTestDbContext _projectTestDb;
 
-        private List<Product> products;
        
         public ProductController(ILogger<ProductController> logger, ProjectTestDbContext projectDb)
         {
             _logger = logger;
             _projectTestDb = projectDb;
-
-            products = new List<Product>()
-            {
-                new Product{
-                    Id = Guid.Parse("2a2f376b-5648-497e-8b23-aadcdee15a29"),
-                    ProductName = "Product1",
-                    QuantityInStock = 1,
-                    UnitPrice = 2
-                },
-                new Product{
-                    Id = Guid.Parse("8b5527dd-eaec-48db-b4a5-ff7aa827a325"),
-                    ProductName = "Product2",
-                    QuantityInStock = 3,
-                    UnitPrice = 2
-                }
-            };
-
-            products.Add(new Product
-            {
-                Id = Guid.Parse("8d699719-ed78-4023-adeb-fe4333255961"),
-                ProductName = "Product3",
-                QuantityInStock = 3,
-                UnitPrice = 2
-            });
-
         }
 
         [HttpGet(Name = "GetProducts")]
         public IEnumerable<Product> GetProducts()
         {
-            return products;
+            return _projectTestDb.Product.ToList();
         }
 
         [HttpGet("{id}")]
@@ -60,15 +35,15 @@ namespace ProjectTest.Controllers
         }
 
         [HttpPost(Name = "CreateProduct")]
-        public Product AddProduct(string productName, double unitPrice, int quantityInStock)
+        public Product AddProduct(AddProduct addproduct)
         {
            
             var product = new Product
             {
                 Id = Guid.NewGuid(),
-                ProductName = productName,
-                UnitPrice = unitPrice,
-                QuantityInStock = quantityInStock
+                ProductName = addproduct.ProductName,
+                UnitPrice = addproduct.UnitPrice,
+                QuantityInStock = addproduct.QuantityInStock
             };
 
             _projectTestDb.Product.Add(product);
@@ -79,18 +54,21 @@ namespace ProjectTest.Controllers
            
 
         [HttpDelete("id")]
-        public List<Product> DeleteProduct(Guid id)
+        public IActionResult DeleteProduct(Guid id)
         {
             var product = FindProduct(id);
 
-            products.Remove(product);
+            _projectTestDb.Product.Remove(product);
 
-            return products;
+            _projectTestDb.SaveChanges();
+
+            return Ok();
+
         }
 
         [HttpPut("id")]
 
-        public Product? UpdateProduct(Guid id, Product updateProduct)
+        public Product? UpdateProduct(Guid id, UpdateProduct updateProduct)
         {
             var product = FindProduct(id);
 
@@ -98,13 +76,15 @@ namespace ProjectTest.Controllers
             product.UnitPrice = updateProduct.UnitPrice;
             product.QuantityInStock = updateProduct.QuantityInStock;
 
+            _projectTestDb.SaveChanges();
+
             return product;
         }
 
 
         private Product? FindProduct(Guid id)
         {
-            var product = products.FirstOrDefault(p => p.Id == id);
+            var product = _projectTestDb.Product.FirstOrDefault(p => p.Id == id);
             return product;
         }
 
