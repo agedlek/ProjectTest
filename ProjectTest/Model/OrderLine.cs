@@ -11,7 +11,7 @@
 
         public Order Order { get; set; }
 
-        public Guid OrderLineId { get; set; }
+        public Guid OrderId { get; set; }
 
     }
 }

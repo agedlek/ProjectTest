@@ -28,7 +28,7 @@ namespace ProjectTest.Data
             modelBuilder.Entity<Order>()
                 .HasMany(o => o.OrderLines)
                 .WithOne(o1 => o1.Order)
-                .HasForeignKey(o1 => o1.OrderLineId)
+                .HasForeignKey(o1 => o1.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
 
