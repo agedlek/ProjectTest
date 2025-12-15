@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using ProjectTest.Data;
 using ProjectTest.Dto;
 using ProjectTest.Model;
@@ -58,8 +59,23 @@ namespace ProjectTest.Controllers
                 OrderName = addOrder.OrderName,
                 OrderSurname = addOrder.OrderSurname,
                 OrderAdress = addOrder.OrderAdress,
-                OrderLines = addOrder.OrderLines
+                OrderLines = new List<OrderLine>()
             };
+
+
+            foreach(var line in addOrder.OrderLines)
+            {
+                newOrder.OrderLines.Add(
+                    new OrderLine
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = line.ProductId,
+                        Quantity = line.Quantity
+
+                    });
+
+                }
+            
 
             _projectTestDb.Order.Add(newOrder);
 
@@ -75,6 +91,7 @@ namespace ProjectTest.Controllers
 
             _projectTestDb.Order.Remove(order);
 
+            _projectTestDb.SaveChanges();
             return Ok();
         }
 

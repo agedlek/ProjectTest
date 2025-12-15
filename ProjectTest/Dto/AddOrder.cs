@@ -7,6 +7,6 @@ namespace ProjectTest.Dto
         public string OrderName { get; set; }
         public string OrderSurname { get; set; }
         public string OrderAdress { get; set; }
-        public List<OrderLine> OrderLines { get; set; }
+        public List<AddOrderLine> OrderLines { get; set; }
     }
 }
