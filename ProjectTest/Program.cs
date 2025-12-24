@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using ProjectTest.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,6 +19,9 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
+builder.Services.AddDbContext<ProjectTestDbContext>(
+    options => options.UseNpgsql(builder.Configuration.GetConnectionString("Connection1")));
 
 var app = builder.Build();
 
