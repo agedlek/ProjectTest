@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using ProjectTest.Data;
+using ProjectTest.Dto;
 using ProjectTest.Model;
 using System.Data;
 
@@ -10,51 +13,21 @@ namespace ProjectTest.Controllers
     {
 
         private readonly ILogger<OrderController> _OrderLogger;
-        public List<Order> orders { get; set; }
+        private readonly ProjectTestDbContext _projectTestDb;
+        
 
-        public OrderController(ILogger<OrderController> orderLogger)
+        public OrderController(ILogger<OrderController> orderLogger, ProjectTestDbContext projectDb)
         {
             _OrderLogger = orderLogger;
-            orders = new List<Order>()
-            {
-                new Order{
-                    Id = Guid.Parse("217f0f20-ba0f-4715-a63b-29703b59557b"),
-                    OrderName = "Julia",
-                    OrderSurname = "Nowak",
-                    OrderAdress = "Krakow",
-                    OrderLines = new List<OrderLine>{
-                         new OrderLine
-                         {
-                             Id= Guid.Parse("102948da-cd2f-4450-8916-1810cdbc301c"),
-                             ProductId = Guid.Parse("2a2f376b-5648-497e-8b23-aadcdee15a29"),
-                             Price = 23,
-                             Quantity = 1
-                         }
-                    }
-                },
-
-                new Order{
-                    Id = Guid.Parse("a8ebc286-dcf1-420a-9efd-5f61d8272d90"),
-                    OrderName = "Adam",
-                    OrderSurname = "Kowalski",
-                    OrderAdress = "Wieliczka",
-                    OrderLines = new List<OrderLine>{
-                         new OrderLine
-                         {
-                             Id= Guid.Parse("102948da-cd2f-4450-8916-1810cdbc301c"),
-                             ProductId = Guid.Parse("8b5527dd-eaec-48db-b4a5-ff7aa827a325"),
-                             Price = 30,
-                             Quantity = 2
-                         }
-                    }
-                }
-            };
+            _projectTestDb = projectDb;
+            
         }
 
         [HttpGet(Name = "GetOrders")]
         public IEnumerable<Order> GetAllOrders()
         {
-            return orders;
+            return _projectTestDb.Order.ToList();
+
         }
 
         [HttpGet("{id}")]
@@ -66,45 +39,65 @@ namespace ProjectTest.Controllers
 
         [HttpPut("{id}")]
 
-        public Order UpdateOrder(Guid id, string updateName, string updateSurname, string updateAdress)
+        public Order UpdateOrder(Guid id, UpdateOrder updateOrder)
         {
-            var order =FindOrder(id);
-            order.OrderName = updateName;
-            order.OrderSurname = updateSurname;
-            order.OrderAdress = updateAdress;
+            var order = FindOrder(id);
+            order.OrderName = updateOrder.Name;
+            order.OrderSurname = updateOrder.Surname;
+            order.OrderAdress = updateOrder.Adress;
+
+            _projectTestDb.SaveChanges();
             return order;
         }
 
         [HttpPost(Name = "CreateOrder")]
-        public List<Order> CreateOrder(string orderName,string orderSurname, string orderAdress, List<OrderLine> orderLines)
+        public Order CreateOrder(AddOrder addOrder)
         {
-            var newOrder = new Order
-            {
+
+            var newOrder = new Order {
                 Id = Guid.NewGuid(),
-                OrderName = orderName,
-                OrderSurname =orderSurname,
-                OrderAdress = orderAdress,
-                OrderLines = orderLines
-                    
+                OrderName = addOrder.OrderName,
+                OrderSurname = addOrder.OrderSurname,
+                OrderAdress = addOrder.OrderAdress,
+                OrderLines = new List<OrderLine>()
             };
 
-            orders.Add(newOrder);
-            return orders;
+
+            foreach(var line in addOrder.OrderLines)
+            {
+                newOrder.OrderLines.Add(
+                    new OrderLine
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = line.ProductId,
+                        Quantity = line.Quantity
+
+                    });
+
+                }
+            
+
+            _projectTestDb.Order.Add(newOrder);
+
+            _projectTestDb.SaveChanges();
+            
+            return newOrder; 
         }
 
         [HttpDelete("id")]
-        public List<Order> DeleteOrder(Guid id)
+        public IActionResult DeleteOrder(Guid id)
         {
             var order = FindOrder(id);
 
-            orders.Remove(order);
+            _projectTestDb.Order.Remove(order);
 
-            return orders;
+            _projectTestDb.SaveChanges();
+            return Ok();
         }
 
         private Order? FindOrder(Guid id)
         {
-            var order = orders.FirstOrDefault(p => p.Id == id);
+            var order = _projectTestDb.Order.FirstOrDefault(o=> o.Id == id);
             return order;
         }
 
